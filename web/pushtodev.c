@@ -26,7 +26,10 @@ int SendData( uint8_t * buffer, int len )
 {
 	if( use_usb )
 	{
-		int r1 = libusb_control_transfer( devh,
+		int tries = 0;
+		int r1;
+		retry:
+		r1 = libusb_control_transfer( devh,
 			0x00,    //reqtype  (0x80 = Device->PC, 0x00 = PC->Device)
 			0xA6,    //request
 			0x0100,  //wValue
@@ -34,6 +37,11 @@ int SendData( uint8_t * buffer, int len )
 			buffer, 
 			len,     //wLength  (more like max length)
 			1000 );
+		if( r1 < len ) 
+		{
+			tries++;
+			if( tries < 10 ) goto retry;
+		}
 	}
 	else
 	{

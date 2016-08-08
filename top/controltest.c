@@ -129,7 +129,7 @@ int main()
 	}
 
 	libusb_release_interface( devh, 0 );
-	libusb_attach_kernel_driver( devh, 0 );
+//	libusb_attach_kernel_driver( devh, 0 );
 	libusb_close( devh );
 	libusb_exit( NULL );
 	printf( "Exit ok.\n" );

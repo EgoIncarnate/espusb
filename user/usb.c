@@ -39,13 +39,18 @@ static const uint8_t config_descriptor[] = {  //Mostly stolen from a USB mouse I
 	// configuration descriptor, USB spec 9.6.3, page 264-266, Table 9-10
 	9, 					// bLength;
 	2,					// bDescriptorType;
-	0x22, 0x00,			// wTotalLength
-	0x01,					// bNumInterfaces
+	0x3b, 0x00,			// wTotalLength  	
+
+	//34, 0x00, //for just the one descriptor
+	
+	0x01,					// bNumInterfaces (Normally 1)
 	0x01,					// bConfigurationValue
 	0x00,					// iConfiguration
-	0xa0,					// bmAttributes
-	100,					// bMaxPower (200mA)
+	0x80,					// bmAttributes (was 0xa0)
+	0x64,					// bMaxPower (200mA)
 
+
+	//Mouse
 	9,					// bLength
 	4,					// bDescriptorType
 	0,			// bInterfaceNumber (unused, would normally be used for HID)
@@ -53,30 +58,99 @@ static const uint8_t config_descriptor[] = {  //Mostly stolen from a USB mouse I
 	1,					// bNumEndpoints
 	0x03,					// bInterfaceClass (0x03 = HID)
 	0x01,					// bInterfaceSubClass
-	0x02,					// bInterfaceProtocol
+	0x02,					// bInterfaceProtocol (Mouse)
 	0,					// iInterface
 
 	9,					// bLength
 	0x21,					// bDescriptorType (HID)
-	0x10, 0x01, 0x00, 0x01, 0x22, 0x48, 0x00,
+	0x10,0x01,		//bcd 1.1
+	0x00, //country code
+	0x01, //Num descriptors
+	0x22, //DescriptorType[0] (HID)
+	0x48, 0x00, //Descriptor length XXX This looks wrong!!!
 
 	7, //endpoint descriptor (For endpoint 1)
 	0x05, //Endpoint Descriptor (Must be 5)
 	0x81, //Endpoint Address
 	0x03, //Attributes
 	0x04,	0x00, //Size
-	0x0a, //Interval (Was 0x0a)
+	0x10, //Interval (Was 0x0a)
+
+
+	//Keyboard  (It is unusual that this would be here)
+	9,					// bLength
+	4,					// bDescriptorType
+	1,			// bInterfaceNumber  = 1 instead of 0 -- well make it second.
+	0,					// bAlternateSetting
+	1,					// bNumEndpoints
+	0x03,					// bInterfaceClass (0x03 = HID)
+	0x01,					// bInterfaceSubClass
+	0x01,					// bInterfaceProtocol (??)
+	0,					// iInterface
+
+	9,					// bLength
+	0x21,					// bDescriptorType (HID)
+	0x10,0x01,		//bcd 1.1
+	0x00, //country code
+	0x01, //Num descriptors
+	0x22, //DescriptorType[0] (HID)
+	63, 0x00, //Descriptor length XXX This looks wrong!!!
+
+	7, //endpoint descriptor (For endpoint 1)
+	0x05, //Endpoint Descriptor (Must be 5)
+	0x83, //Endpoint Address
+	0x03, //Attributes
+	0x08,	0x00, //Size (8 bytes)
+	0x10, //Interval (Was 0x0a)
 };
 
 
 
-static const uint8_t mouse_hid_desc[] = {  //Mostly stolen from a USB mouse I found.
+
+static const uint8_t mouse_hid_desc[] = {  //Mostly stolen from a Microsoft USB mouse I found.
 	0x05, 0x01, 0x09, 0x02, 0xa1, 0x01, 0x09, 0x01, 0xa1, 0x00, 0x05, 0x09, 0x19, 0x01, 0x29, 0x03,
 	0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x03, 0x81, 0x02, 0x75, 0x05, 0x95, 0x01, 0x81, 0x01,
 	0x05, 0x01, 0x09, 0x30, 0x09, 0x31, 0x09, 0x38, 0x15, 0x81, 0x25, 0x7f, 0x75, 0x08, 0x95, 0x03,
 	0x81, 0x06, 0xc0, 0x05, 0xff, 0x09, 0x02, 0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x01, 0xb1,
 	0x22, 0x75, 0x07, 0x95, 0x01, 0xb1, 0x01, 0xc0, 
 };
+
+//From http://codeandlife.com/2012/06/18/usb-hid-keyboard-with-v-usb/
+static const uint8_t keyboard_hid_desc[63] = {   /* USB report descriptor */
+    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
+    0x09, 0x06,                    // USAGE (Keyboard)
+    0xa1, 0x01,                    // COLLECTION (Application)
+    0x75, 0x01,                    //   REPORT_SIZE (1)
+    0x95, 0x08,                    //   REPORT_COUNT (8)
+    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)(Key Codes)
+    0x19, 0xe0,                    //   USAGE_MINIMUM (Keyboard LeftControl)(224)
+    0x29, 0xe7,                    //   USAGE_MAXIMUM (Keyboard Right GUI)(231)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
+    0x81, 0x02,                    //   INPUT (Data,Var,Abs) ; Modifier byte
+    0x95, 0x01,                    //   REPORT_COUNT (1)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x81, 0x03,                    //   INPUT (Cnst,Var,Abs) ; Reserved byte
+    0x95, 0x05,                    //   REPORT_COUNT (5)
+    0x75, 0x01,                    //   REPORT_SIZE (1)
+    0x05, 0x08,                    //   USAGE_PAGE (LEDs)
+    0x19, 0x01,                    //   USAGE_MINIMUM (Num Lock)
+    0x29, 0x05,                    //   USAGE_MAXIMUM (Kana)
+    0x91, 0x02,                    //   OUTPUT (Data,Var,Abs) ; LED report
+    0x95, 0x01,                    //   REPORT_COUNT (1)
+    0x75, 0x03,                    //   REPORT_SIZE (3)
+    0x91, 0x03,                    //   OUTPUT (Cnst,Var,Abs) ; LED report padding
+    0x95, 0x06,                    //   REPORT_COUNT (6)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x25, 0x65,                    //   LOGICAL_MAXIMUM (101)
+    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)(Key Codes)
+    0x19, 0x00,                    //   USAGE_MINIMUM (Reserved (no event indicated))(0)
+    0x29, 0x65,                    //   USAGE_MAXIMUM (Keyboard Application)(101)
+    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+    0xc0                           // END_COLLECTION
+};
+
 
 #define STR_MANUFACTURER L"CNLohr"
 #define STR_PRODUCT      L"ESPUSB"
@@ -120,6 +194,7 @@ const static struct descriptor_list_struct {
 	{0x0100, 0x0000, device_descriptor, sizeof(device_descriptor)},
 	{0x0200, 0x0000, config_descriptor, sizeof(config_descriptor)},
 	{0x2200, 0x0000, mouse_hid_desc, sizeof(mouse_hid_desc)},
+	{0x2200, 0x0001, keyboard_hid_desc, sizeof(keyboard_hid_desc)},
 //	{0x2100, KEYBOARD_INTERFACE, config1_descriptor+KEYBOARD_HID_DESC_OFFSET, 9},
 	{0x0300, 0x0000, (const uint8_t *)&string0, 4},
 	{0x0301, 0x0409, (const uint8_t *)&string1, sizeof(STR_MANUFACTURER)},
@@ -199,10 +274,32 @@ void handle_in( uint32_t this_token, struct usb_internal_state_struct * ist )
 		}
 		else
 		{
-			uint8_t sendword[2] = { 0x80, 0xD2 };  //Empty data.
+			uint8_t sendword[2] = { 0x80, 0x5a };  //Empty data.
 			usb_send_data( sendword, 2, 2 );
+			return;
 		}
 	}
+
+	if( endp == 0x3 && addr == ist->my_address )
+	{
+		if( ist->sendep2 )
+		{
+			ist->ep2data[0] = 0;
+			ist->ep2data[1] = 0;
+			ist->ep2data[2] = 8;
+			ist->ep2data[3] = 0;
+			ist->usb_bufferret = ist->ep2data;
+			ist->usb_bufferret_len = sizeof( ist->ep2data );
+			ist->sendep2 = 0;
+		}
+		else
+		{
+			uint8_t sendword[2] = { 0x80, 0x5a };  //Empty data.
+			usb_send_data( sendword, 2, 2 );
+			return;
+		}
+	}
+
 
 	//TODO: Need to handle saying "nah, we're good!" if we're good.
 	//00688a69
@@ -286,6 +383,11 @@ void handle_data( uint32_t this_token, struct usb_internal_state_struct * ist, u
 				ist->usb_bufferret = dl->addr;
 				ist->usb_bufferret_len = dl->length;
 				if( s->wLength < ist->usb_bufferret_len ) ist->usb_bufferret_len = s->wLength;
+			}
+			if( s->bRequest == 0x00 )
+			{
+				ist->usb_bufferret = (uint8_t*)&ist->status;
+				ist->usb_bufferret_len = 3;
 			}
 
 			/////////////////////////////EXAMPLE CUSTOM CONTROL MESSAGE/////////////////////////////

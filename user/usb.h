@@ -40,6 +40,8 @@ struct usb_internal_state_struct
 	uint8_t ep1data[4];
 	int     sendep1;
 
+	uint8_t ep2data[8];
+	int     sendep2;
 
 	//Awkward example with use of control messages to get data to/from device.
 	uint8_t * usb_bufferaccept;
@@ -48,6 +50,9 @@ struct usb_internal_state_struct
 	uint8_t user_control[150];
 	int     user_control_length_acc; //From host to us.
 	int     user_control_length_ret; //From us to host.
+
+	//For the GET_STATUS command.  Should be 0 unless we want to start suspending.
+	uint16_t status; 
 };
 
 extern struct usb_internal_state_struct usb_internal_state __attribute__((aligned(4)));
